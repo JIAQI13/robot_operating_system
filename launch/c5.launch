@@ -1,0 +1,44 @@
+<launch>
+    <include file="$(find turtlebot_bringup)/launch/minimal.launch"/>
+    <!-- <include file="$(find turtlebot_bringup)/launch/3dsensor.launch"/> -->
+
+    <include file="$(find turtlebot_teleop)/launch/logitech.launch"/>
+    <include file="$(find c5)/launch/amcl.launch">
+        <!-- <arg name="map_file" value = "/home/hzhang/map.yaml"/> -->
+        <!-- <arg name="map_file" value = "/home/robot/catkin_ws/src/CMPUT-412-C5/map.yaml"/> -->
+        <arg name="map_file" value = "/home/humphrey/Documents/catkin_ws/src/c5/map.yaml"/>
+        <param file="$(find c4)/param/costmap_common_params.yaml" command="load" ns="global_costmap" />
+        <param file="$(find c4)/param/costmap_common_params.yaml" command="load" ns="local_costmap" />
+        <param file="$(find c4)/param/global_costmap_params.yaml" command="load" />
+        <param file="$(find c4)/param/local_costmap_params.yaml" command="load" />
+        <param file="$(find c4)/param/dwa_local_planner_params.yaml" command="load" />
+        <param file="$(find c4)/param/move_base_params.yaml" command="load" />
+    </include>
+
+    <!-- <include file="$(find turtlebot_rviz_launchers)/launch/view_navigation.launch"/> -->
+
+    <arg name="marker_size" default="19.9" />
+    <arg name="max_new_marker_error" default="0.08" />
+    <arg name="max_track_error" default="0.2" />
+    <arg name="cam_image_topic" default="/camera/rgb/image_raw" />
+    <arg name="cam_info_topic" default="/camera/rgb/camera_info" />
+    <arg name="output_frame" default="/base_link" />
+    <node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect" respawn="false" output="screen">
+        <param name="marker_size"           type="double" value="$(arg marker_size)" />
+        <param name="max_new_marker_error"  type="double" value="$(arg max_new_marker_error)" />
+        <param name="max_track_error"       type="double" value="$(arg max_track_error)" />
+        <param name="output_frame"          type="string" value="$(arg output_frame)" />
+
+        <remap from="camera_image"  to="$(arg cam_image_topic)" />
+        <remap from="camera_info"   to="$(arg cam_info_topic)" />
+    </node>
+
+    <node pkg="uvc_camera" type="uvc_camera_node" name="uvc_camera" output="screen">
+        <param name="device" type="string" value="/dev/video1" />
+        <remap from="/image_raw" to="usb_cam/image_raw"/>
+    </node>
+
+    <!--node pkg="smach_viewer" type="smach_viewer.py" name="smach_viewer" /-->
+
+    <node pkg="c5" name="c5_main" type="c5_main_4.py" output="screen"/>
+</launch>
